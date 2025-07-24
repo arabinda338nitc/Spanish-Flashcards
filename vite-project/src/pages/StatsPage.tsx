@@ -1,4 +1,4 @@
-import React from 'react';
+
 
 const StatsPage: React.FC = () => (
   <div style={{ textAlign: 'center', marginTop: 48 }}>
