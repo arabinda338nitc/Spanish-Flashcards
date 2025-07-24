@@ -37,10 +37,13 @@ const Flashcard: React.FC<FlashcardProps> = ({ spanish, english, onRight, onWron
           border: flipped ? '2px solid #1976d2' : '2px solid transparent',
         }}
       >
-        <div style={{ 
-          textAlign: 'center',
-          transition: 'all 0.3s ease'
-        }}>
+        <div 
+          data-testid="flashcard-content"
+          style={{ 
+            textAlign: 'center',
+            transition: 'all 0.3s ease'
+          }}
+        >
           {flipped ? english : spanish}
         </div>
       </div>
