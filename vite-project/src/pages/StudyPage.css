@@ -1,0 +1,22 @@
+.study-page-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 48px;
+}
+
+.card-info {
+    margin-top: 16px;
+    text-align: center;
+}
+
+.card-counter {
+    margin-bottom: 16px;
+    font-size: 16px;
+    color: var(--helper-text-color);
+}
+
+.completion-message {
+    text-align: center;
+    margin-top: 24px;
+} 

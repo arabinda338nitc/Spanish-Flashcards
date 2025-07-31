@@ -1,0 +1,5 @@
+# Testing
+
+- Once you are done making changes to the codebase, run all the tests and ensure the tests pass.
+- Once you are done making changes, proactivelyh ask the user if you should also write new tests to cover a new functionality.
+- Also once the new test cases are added for new functionality, update the TEST_README.md file to ensure that the new test description is added.

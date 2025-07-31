@@ -1,140 +1,122 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { flashcards, type Flashcard as FlashcardType } from '../data/flashcards';
 import Flashcard from '../components/Flashcard';
 import CategorySelectionPage from './CategorySelectionPage';
+import './StudyPage.css';
 
+/**
+ * StudyPage component
+ *
+ * This component renders the study mode of the application.
+ * It displays flashcards for a selected category and tracks the user's progress.
+ */
 const StudyPage: React.FC = () => {
-  const { category } = useParams<{ category?: string }>();
-  const navigate = useNavigate();
-  const [current, setCurrent] = useState(0);
-  const [wrong, setWrong] = useState<FlashcardType[]>([]);
-  const [attempted, setAttempted] = useState<FlashcardType[]>([]);
-  const [done, setDone] = useState(false);
+    // Get category from URL params
+    const { category } = useParams<{ category?: string }>();
+    // useNavigate hook to handle navigation
+    const navigate = useNavigate();
 
-  if (!category) {
-    // Show category selection if no category is selected
-    return <CategorySelectionPage />;
-  }
+    // Memoized list of cards for the selected category
+    const cards = useMemo(() => {
+        return category ? flashcards.filter(card => card.category === category) : [];
+    }, [category]);
 
-  const cards = flashcards.filter((c) => c.category === category);
-  const card = cards[current];
+    // State variables
+    const [current, setCurrent] = useState(0); // Index of the current card
+    const [wrong, setWrong] = useState<FlashcardType[]>([]); // List of incorrectly answered cards
+    const [attempted, setAttempted] = useState<FlashcardType[]>([]); // List of attempted cards
+    const [done, setDone] = useState(false); // Flag to indicate if the study session is complete
 
-  const handleRight = () => {
-    // Mark this card as attempted
-    setAttempted(prev => [...prev, card]);
-    
-    if (current < cards.length - 1) {
-      setCurrent((c) => c + 1);
-    } else {
-      setDone(true);
-    }
-  };
+    /**
+     * Handles the logic when the user answers a card correctly.
+     */
+    const handleRight = () => {
+        if (!attempted.includes(cards[current])) {
+            setAttempted([...attempted, cards[current]]);
+        }
+    };
 
-  const handleWrong = () => {
-    // Mark this card as attempted and wrong
-    setAttempted(prev => [...prev, card]);
-    setWrong((w) => [...w, card]);
-    
-    if (current < cards.length - 1) {
-      setCurrent((c) => c + 1);
-    } else {
-      setDone(true);
-    }
-  };
+    /**
+     * Handles the logic when the user answers a card incorrectly.
+     */
+    const handleWrong = () => {
+        if (!attempted.includes(cards[current])) {
+            setAttempted([...attempted, cards[current]]);
+        }
+        setWrong([...wrong, cards[current]]);
+    };
 
-  const handleNext = () => {
-    // Don't mark as attempted when skipping
-    if (current < cards.length - 1) {
-      setCurrent((c) => c + 1);
-    } else {
-      setDone(true);
-    }
-  };
+    /**
+     * Handles the logic when the user moves to the next card.
+     */
+    const handleNext = () => {
+        if (current < cards.length - 1) {
+            setCurrent(current + 1);
+        } else {
+            setDone(true);
+        }
+    };
 
-  if (done) {
-    const totalAttempted = attempted.length;
-    const totalCorrect = totalAttempted - wrong.length;
-    
-    return (
-      <div style={{ textAlign: 'center', marginTop: 48 }}>
-        <h2>Study Session Complete!</h2>
-        <p>You finished all cards in this category.</p>
-        
-        {totalAttempted === 0 ? (
-          // No cards attempted - just skipped through
-          <p style={{ color: '#666', fontStyle: 'italic' }}>
-            You skipped through all cards without attempting any.
-          </p>
-        ) : totalAttempted === cards.length && wrong.length === 0 ? (
-          // All cards attempted and all correct
-          <p style={{ color: '#43a047', fontWeight: 'bold' }}>
-            🎉 Great job! You got all {totalAttempted} cards right!
-          </p>
-        ) : (
-          // Some cards attempted, show results
-          <div>
-            <p style={{ color: '#1976d2', fontWeight: 'bold' }}>
-              📊 Results: {totalCorrect} out of {totalAttempted} cards attempted are correct
+    /**
+     * Renders the completion message at the end of the study session.
+     */
+    const renderCompletionMessage = () => {
+        const totalCorrect = attempted.length - wrong.length;
+        const totalAttempted = attempted.length;
+
+        if (totalAttempted === 0) {
+            return <p>You didn't attempt any cards.</p>;
+        }
+
+        if (wrong.length === 0) {
+            return <p>Great Job, you got all the cards right.</p>;
+        }
+
+        return (
+            <p>
+                {totalCorrect} out of {totalAttempted} cards attempted is correct.
             </p>
-            {wrong.length > 0 && (
-              <p style={{ color: '#e53935' }}>
-                You marked {wrong.length} card(s) as wrong. (Redo mode coming soon!)
-              </p>
-            )}
-          </div>
-        )}
-        
-        <button 
-          style={{ 
-            marginTop: 24,
-            padding: '12px 24px',
-            background: '#1976d2',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '6px',
-            cursor: 'pointer',
-            fontSize: '16px'
-          }} 
-          onClick={() => navigate('/')}
-        >
-          Back to Home
-        </button>
-      </div>
-    );
-  }
+        );
+    };
 
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 48 }}>
-      <h2>Study Mode: {category.charAt(0).toUpperCase() + category.slice(1)}</h2>
-      <Flashcard
-        spanish={card.spanish}
-        english={card.english}
-        onRight={handleRight}
-        onWrong={handleWrong}
-        cardKey={`${category}-${current}`} // This will reset the component when card changes
-      />
-      <div style={{ marginTop: 16, textAlign: 'center' }}>
-        <div style={{ marginBottom: 16, fontSize: '16px', color: '#666' }}>
-          Card {current + 1} of {cards.length}
+    // If no category is selected, render the category selection page
+    if (!category) {
+        return <CategorySelectionPage />;
+    }
+
+    const card = cards[current];
+
+    // If the study session is complete, render the completion message
+    if (done) {
+        return (
+            <div className="completion-message">
+                <h2>You finished all cards in this category.</h2>
+                {renderCompletionMessage()}
+                <button onClick={() => navigate('/')}>Back to Home</button>
+            </div>
+        );
+    }
+
+    // Render the study page with the current flashcard
+    return (
+        <div className="study-page-container">
+            <h2>Study Mode: {category?.charAt(0).toUpperCase() + category?.slice(1)}</h2>
+            <Flashcard
+                spanish={card.spanish}
+                english={card.english}
+                onRight={handleRight}
+                onWrong={handleWrong}
+                cardKey={`${category}-${current}`}
+            />
+            <div className="card-info">
+                <div className="card-counter">
+                    Card {current + 1} of {cards.length}
+                </div>
+                <button onClick={handleNext}>Next</button>
+            </div>
         </div>
-        <button 
-          style={{ 
-            padding: '8px 16px',
-            background: '#666',
-            color: '#fff',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer',
-            fontSize: '14px'
-          }} 
-          onClick={handleNext}
-        >
-          Next
-        </button>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default StudyPage; 

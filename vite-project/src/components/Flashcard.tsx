@@ -1,96 +1,66 @@
 import { useState, useEffect } from 'react';
+import './Flashcard.css';
 
 interface FlashcardProps {
   spanish: string;
   english: string;
   onRight: () => void;
   onWrong: () => void;
-  cardKey?: string; // Add a key to reset the component when card changes
+  cardKey?: string;
 }
 
+/**
+ * Flashcard component
+ *
+ * This component renders a flashcard with a Spanish word on the front and an English word on the back.
+ * The card can be flipped by clicking on it.
+ * When the card is flipped, the user can mark their answer as right or wrong.
+ */
 const Flashcard: React.FC<FlashcardProps> = ({ spanish, english, onRight, onWrong, cardKey }) => {
-  const [flipped, setFlipped] = useState(false);
+    // State to track if the card is flipped
+    const [flipped, setFlipped] = useState(false);
 
-  // Reset flipped state when card changes
-  useEffect(() => {
-    setFlipped(false);
-  }, [cardKey]);
+    // useEffect hook to reset the flipped state when the card changes
+    useEffect(() => {
+        setFlipped(false);
+    }, [cardKey]);
 
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <div
-        onClick={() => setFlipped(true)}
-        style={{
-          width: 300,
-          height: 180,
-          background: '#fff',
-          borderRadius: 12,
-          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          fontSize: '2em',
-          cursor: 'pointer',
-          marginBottom: 24,
-          transition: 'all 0.3s ease',
-          transform: flipped ? 'scale(1.02)' : 'scale(1)',
-          border: flipped ? '2px solid #1976d2' : '2px solid transparent',
-        }}
-      >
-        <div 
-          data-testid="flashcard-content"
-          style={{ 
-            textAlign: 'center',
-            transition: 'all 0.3s ease'
-          }}
-        >
-          {flipped ? english : spanish}
+    // CSS classes for the card
+    const cardClasses = `flashcard ${flipped ? 'flipped' : ''}`;
+
+    return (
+        <div className="flashcard-container">
+            <div
+                className={cardClasses}
+                onClick={() => setFlipped(!flipped)}
+                data-testid="flashcard"
+            >
+                {/* Front of the card */}
+                <div className="card-face card-front" data-testid="flashcard-content-front">
+                    {spanish}
+                </div>
+                {/* Back of the card */}
+                <div className="card-face card-back" data-testid="flashcard-content-back">
+                    {english}
+                </div>
+            </div>
+
+            {/* Buttons to mark the answer as right or wrong */}
+            {flipped && (
+                <div className="flashcard-buttons">
+                    <button className="right-button" onClick={onRight}>✅ Right</button>
+                    <button className="wrong-button" onClick={onWrong}>❌ Wrong</button>
+                </div>
+            )}
+
+            {/* Helper text to guide the user */}
+            {!flipped && (
+                <div className="helper-text">
+                    Click the card to see the translation
+                </div>
+            )}
         </div>
-      </div>
-      {flipped && (
-        <div style={{ display: 'flex', gap: 16 }}>
-          <button 
-            style={{ 
-              background: '#43a047', 
-              color: '#fff',
-              padding: '12px 24px',
-              borderRadius: '6px',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: '16px'
-            }} 
-            onClick={onRight}
-          >
-            ✅ Right
-          </button>
-          <button 
-            style={{ 
-              background: '#e53935', 
-              color: '#fff',
-              padding: '12px 24px',
-              borderRadius: '6px',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: '16px'
-            }} 
-            onClick={onWrong}
-          >
-            ❌ Wrong
-          </button>
-        </div>
-      )}
-      {!flipped && (
-        <div style={{ 
-          marginTop: 16, 
-          color: '#666', 
-          fontSize: '14px',
-          textAlign: 'center'
-        }}>
-          Click the card to see the translation
-        </div>
-      )}
-    </div>
-  );
+    );
 };
 
 export default Flashcard; 

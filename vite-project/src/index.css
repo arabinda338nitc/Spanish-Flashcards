@@ -1,5 +1,14 @@
 /* index.css */
 
+:root {
+  --primary-color: rgb(9, 102, 194);
+  --right-color: #4caf50;
+  --wrong-color: #f44336;
+  --helper-text-color: #666;
+  --card-front-bg: #f0f0f0;
+  --card-back-bg: #e0e0e0;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
